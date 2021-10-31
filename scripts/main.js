@@ -94,10 +94,10 @@ function drawPC() {
 
   // Calculate PC velocity & rotation
   if (charDirection === directions.right) {
-    pcX = pcX + gravity*2;
+    pcX = Math.min(pcX + gravity*2, cvsSize-xMargin);
     rot = -rad;
   } else if ( charDirection === directions.left) {
-    pcX = pcX - gravity*2;
+    pcX = Math.max(pcX - gravity*2, xMargin);
     rot = rad
   }
 
@@ -124,7 +124,7 @@ function draw(){
   drawPC();
 
   bgTranslate += gravity;
-
+  console.log(pcX);
   requestAnimationFrame(draw);
 }
 
