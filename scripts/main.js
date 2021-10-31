@@ -18,14 +18,26 @@ const lineSpacing = 100;
 const gridCount = 6;
 const xMargin = 30;
 let bgTranslate = 0;
-const gravity = 9.8/10/2;
+const gravity = 9.8/10;
 
 const cvsSize = lineSpacing*gridCount + 2*xMargin;
 
+let nodeList = [
+  [
+    lineSpacing*2,
+    [xMargin, cvsSize/2]
+  ],
+  [
+    lineSpacing*4,
+    [xMargin, cvsSize/2]
+  ]
+];
+
 // Player Character Variables
 let pcX = cvsSize*0.5;
-let pcY = cvsSize*0.25;
+let pcY = cvsSize*0.25; // pcY will be snapped to the nearest node at runtime
 let charDirection;
+let hitTolerance = 10; // How close in pixels to a node counts as a hit
 
 // Other variables
 let isPaused = false;
@@ -69,6 +81,23 @@ function drawGrid() {
 
 function drawNodes() {
   //This is where BG nodes should be drawn
+
+  ctx.strokeStyle = "red";
+  for (let i=0; i<nodeList.length; i++) {
+    let y = nodeList[i][0];
+    let xVals = nodeList[i][1];
+
+    for (let j=0; j<xVals.length; j++) {
+      ctx.beginPath();
+      ctx.arc(xVals[j], y, 10, 0, 2 * Math.PI);
+      ctx.stroke();
+
+    }
+    // Update y position for next frame after drawing node
+    nodeList[i][0] = y - gravity;
+
+  }
+  ctx.strokeStyle = "black";
 }
 
 
@@ -85,6 +114,15 @@ function drawBG() {
 
 /*--------------------------------------------------------------------------------*/
 
+function playerOnNode() {
+  // Figure out if player is on node and return the node they're on
+  // Use hitTolerance variable to allow wiggle room
+  //Math.hypot(x2-x1, y2-y1)
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
 
 function drawPC() {
   ctx.save();
@@ -94,10 +132,10 @@ function drawPC() {
 
   // Calculate PC velocity & rotation
   if (charDirection === directions.right) {
-    pcX = Math.min(pcX + gravity*2, cvsSize-xMargin);
+    pcX = Math.min(pcX + gravity, cvsSize-xMargin);
     rot = -rad;
   } else if ( charDirection === directions.left) {
-    pcX = Math.max(pcX - gravity*2, xMargin);
+    pcX = Math.max(pcX - gravity, xMargin);
     rot = rad
   }
 
@@ -123,7 +161,7 @@ function draw(){
   drawBG();
   drawPC();
 
-  bgTranslate += gravity;
+  //bgTranslate += gravity;
   console.log(pcX);
   requestAnimationFrame(draw);
 }
@@ -157,10 +195,13 @@ function moveChar(e) {
 /*--------------------------------------------------------------------------------*/
 
 
+// Set canvas scale
 canvas.width = cvsSize;
 canvas.height = cvsSize;
 
-charDirection = directions.none;
+// Set player starting attributes
+pcY = Math.ceil(pcY/lineSpacing)*lineSpacing;
+charDirection = directions.left;
 
 // Toggle pause when button clicked
 pauseBtn.addEventListener("click", function() {
