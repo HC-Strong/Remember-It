@@ -1,6 +1,10 @@
 // Images
 const pc = new Image();
-pc.src = "images/pc_v01.png";
+pc.src = "images/pc.png";
+const pc_centerCoords = {
+  x: 33, // coords of center of main hexagon from Affinity Designer
+  y: 55
+}
 
 
 // Get refs to HTML elements
@@ -82,21 +86,46 @@ function drawBG() {
 /*--------------------------------------------------------------------------------*/
 
 
+function drawPC() {
+  ctx.save();
+
+  const rad = 2*Math.PI / 8; // 45 degrees
+  let rot = 0;
+
+  // Calculate PC velocity & rotation
+  if (charDirection === directions.right) {
+    pcX = pcX + gravity*2;
+    rot = -rad;
+  } else if ( charDirection === directions.left) {
+    pcX = pcX - gravity*2;
+    rot = rad
+  }
+
+  // Apply transforms based on velocity, rotation, and pixel offset of image center
+  ctx.translate(pcX, pcY);
+  ctx.rotate(rot);
+  ctx.translate(-pc_centerCoords.x, -pc_centerCoords.y);
+
+  // Draw PC Image
+  ctx.drawImage(pc,0,0);
+
+  ctx.restore();
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
 function draw(){
   if (isPaused) { return; }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawBG();
 
-  if (charDirection === directions.right) {
-    pcX = pcX + gravity*2;
-  } else if ( charDirection === directions.left) {
-    pcX = pcX - gravity*2;
-  }
-  ctx.drawImage(pc,pcX, pcY);
+  drawBG();
+  drawPC();
 
   bgTranslate += gravity;
 
-    requestAnimationFrame(draw);
+  requestAnimationFrame(draw);
 }
 
 
