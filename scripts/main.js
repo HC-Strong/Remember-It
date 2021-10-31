@@ -63,20 +63,19 @@ function drawGrid() {
 
 /*--------------------------------------------------------------------------------*/
 
+function drawNodes() {
+  //This is where BG nodes should be drawn
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
 
 function drawBG() {
 
   drawGrid();
-  return;
+  drawNodes();
 
-  ctx.translate(-cvsSize*2, bgTranslate);
-
-  for (let i=-cvsSize*2; i<cvsSize*2;i+=lineSpacing) {
-    drawLine(0, cvsSize*2, cvsSize*2, 0);
-    drawLine(0,0, cvsSize*2, cvsSize*2);
-    ctx.translate(lineSpacing, 0);
-  }
-  ctx.translate(-cvsSize*2, -bgTranslate);
 }
 
 
