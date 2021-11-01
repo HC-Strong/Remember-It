@@ -18,20 +18,31 @@ const lineSpacing = 100;
 const gridCount = 6;
 const xMargin = 30;
 let bgTranslate = 0;
+let prevBgTranslate = 0;
 const gravity = 9.8/10;
 
 const cvsSize = lineSpacing*gridCount + 2*xMargin;
 
-let nodeList = [
-  [
-    lineSpacing*2,
-    [xMargin, cvsSize/2]
-  ],
-  [
-    lineSpacing*4,
-    [xMargin, cvsSize/2]
-  ]
-];
+// Row layouts will be generated at runtime from rowLayoutSpecs
+let rowLayout = {};
+
+// Empty array to hold node list
+let nodeList = [[]];
+let nextRowIsA = false;
+
+const rowLayoutSpecs = {
+  a : {
+    start: xMargin,
+    count: gridCount + 1
+  },
+  b: {
+   start: xMargin + lineSpacing/2,
+   count: gridCount
+ }
+};
+
+
+
 
 // Player Character Variables
 let pcX = cvsSize*0.5;
@@ -79,23 +90,48 @@ function drawGrid() {
 
 /*--------------------------------------------------------------------------------*/
 
+
+function manageNodes() {
+
+  // Check if bgTranslate has crossed the halfway point OR wrapped back to zero
+  let updateRows = (bgTranslate < prevBgTranslate)
+      || (bgTranslate >= lineSpacing/2 && prevBgTranslate < lineSpacing/2);
+
+
+  if (updateRows) {
+    console.log("Node Change");
+
+    nodeList.shift();
+
+    if (nextRowIsA) {
+      nodeList.push(rowLayout.a);
+    } else {
+      nodeList.push(rowLayout.b);
+    }
+
+    nextRowIsA = !nextRowIsA;
+  }
+  prevBgTranslate = bgTranslate;
+}
+
+/*--------------------------------------------------------------------------------*/
+
 function drawNodes() {
-  //This is where BG nodes should be drawn
+  manageNodes();
 
   ctx.strokeStyle = "red";
   for (let i=0; i<nodeList.length; i++) {
-    let y = nodeList[i][0];
-    let xVals = nodeList[i][1];
+
+    // nextRowIsA toggles as the offset needs to change size
+    let y = i*lineSpacing/2 - bgTranslate + nextRowIsA*lineSpacing/2;
+
+    let xVals = nodeList[i];
 
     for (let j=0; j<xVals.length; j++) {
       ctx.beginPath();
       ctx.arc(xVals[j], y, 10, 0, 2 * Math.PI);
       ctx.stroke();
-
     }
-    // Update y position for next frame after drawing node
-    nodeList[i][0] = y - gravity;
-
   }
   ctx.strokeStyle = "black";
 }
@@ -105,10 +141,8 @@ function drawNodes() {
 
 
 function drawBG() {
-
   drawGrid();
   drawNodes();
-
 }
 
 
@@ -154,31 +188,14 @@ function drawPC() {
 /*--------------------------------------------------------------------------------*/
 
 
-function draw(){
-  if (isPaused) { return; }
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawBG();
-  drawPC();
-
-  //bgTranslate += gravity;
-  console.log(pcX);
-  requestAnimationFrame(draw);
-}
-
-
-/*--------------------------------------------------------------------------------*/
-
-
 function moveChar(e) {
-  console.log(e.keyCode);
   switch(e.keyCode) {
     // Thought this was 37 or 65
     case 97:
       charDirection = directions.left;
       break;
 
-    // THought this was 39 or 68
+    // Thought this was 39 or 68
     case 100:
       charDirection = directions.right;
       break;
@@ -187,8 +204,34 @@ function moveChar(e) {
       charDirection = directions.none;
       console.log("unknown key pressed");
   }
-  console.log(charDirection);
+}
 
+
+/*--------------------------------------------------------------------------------*/
+
+// Take data from rowLayoutSpecs variable and generate the actual row layout array
+function generateRowLayouts(layoutSpec) {
+  let layoutArr = [];
+
+  for (let i=0; i<layoutSpec.count; i++) {
+    layoutArr.push(layoutSpec.start + i*lineSpacing);
+  }
+  console.log(layoutArr);
+  return layoutArr;
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+function draw(){
+  if (isPaused) { return; }
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawBG();
+  drawPC();
+
+  requestAnimationFrame(draw);
 }
 
 
@@ -198,6 +241,25 @@ function moveChar(e) {
 // Set canvas scale
 canvas.width = cvsSize;
 canvas.height = cvsSize;
+
+// Generate row layout arrays from rowLayoutSpecs
+rowLayout.a = generateRowLayouts(rowLayoutSpecs.a);
+rowLayout.b = generateRowLayouts(rowLayoutSpecs.b);
+
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
+nodeList.push(rowLayout.b);
+nodeList.push(rowLayout.a);
 
 // Set player starting attributes
 pcY = Math.ceil(pcY/lineSpacing)*lineSpacing;
