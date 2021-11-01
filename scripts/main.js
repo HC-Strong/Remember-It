@@ -285,9 +285,9 @@ function handleKeypress(e) {
       break;
 
     case 32:
-        isPaused = !isPaused;
-        draw();
-        break;
+      isPaused = !isPaused;
+      draw();
+      break;
 
     default:
       console.log("unknown key pressed: " + e.keyCode);
