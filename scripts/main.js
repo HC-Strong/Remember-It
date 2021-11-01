@@ -254,7 +254,7 @@ function drawPC() {
 /*--------------------------------------------------------------------------------*/
 
 
-function moveChar(e) {
+function handleKeypress(e) {
   switch(e.keyCode) {
     // Thought this was 37 or 65
     case 97:
@@ -266,9 +266,14 @@ function moveChar(e) {
       charDirection = directions.right;
       break;
 
+    case 32:
+        isPaused = !isPaused;
+        draw();
+        break;
+
     default:
       charDirection = directions.none;
-      console.log("unknown key pressed");
+      console.log("unknown key pressed: " + e.keyCode);
   }
 }
 
@@ -334,12 +339,12 @@ charDirection = directions.left;
 
 // Toggle pause when button clicked
 pauseBtn.addEventListener("click", function() {
-  isPaused = isPaused ? false : true;
+  isPaused = !isPaused;
   draw();
   console.log("isPaused: " + isPaused);
 });
 
 // Add Player Controls
-document.addEventListener("keypress", e => moveChar(e));
+document.addEventListener("keypress", e => handleKeypress(e));
 
 draw();
