@@ -51,9 +51,8 @@ const rowLayoutSpecs = {
 let pcX = cvsSize*0.5;
 let pcY = cvsSize*0.25; // pcY will be snapped to the nearest node at runtime
 let charDirection;
-let hitTolerance = 15; // How close in pixels to a node counts as a hit
-// Probably good to set this to something around 10 when pc is forced on the track
-// Keep it higher until then
+let hitTolerance = 1; // How close in pixels to a node counts as a hit
+let nextDirection;
 
 // Other variables
 let isPaused = false;
@@ -187,7 +186,6 @@ function playerOnNode() {
   if(Math.abs(pcX - nearestNodeX) > hitTolerance ) { return; }
 
 
-
   return {
     row: activeRowId,
     col: nearestNodeId
@@ -209,12 +207,32 @@ function simpleScoreUpdate(newScore) {
 /*--------------------------------------------------------------------------------*/
 
 
+/* Check if hit edge, change direction if so
+* Otherwise, change direction to user-specified direction */
+function changePlayerDir(node) {
+
+  if( nodeList[node.row][node.col] == xMargin ) {
+
+    nextDirection = directions.right;
+  } else if ( node.col == gridCount ) {
+
+    nextDirection = directions.left;
+  }
+  console.log("Dir change from " + charDirection + " to " + nextDirection);
+  charDirection = nextDirection;
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
 function handleNodeCollisions() {
   const node = playerOnNode();
 
   // Clear collided node by moving it way off screen to the left
   if (node) {
     simpleScore++;
+    changePlayerDir(node);
     nodeList[node.row][node.col] = -1000;
     simpleScoreUpdate();
   }
@@ -258,12 +276,12 @@ function handleKeypress(e) {
   switch(e.keyCode) {
     // Thought this was 37 or 65
     case 97:
-      charDirection = directions.left;
+      nextDirection = directions.left;
       break;
 
     // Thought this was 39 or 68
     case 100:
-      charDirection = directions.right;
+      nextDirection = directions.right;
       break;
 
     case 32:
@@ -272,7 +290,6 @@ function handleKeypress(e) {
         break;
 
     default:
-      charDirection = directions.none;
       console.log("unknown key pressed: " + e.keyCode);
   }
 }
@@ -336,6 +353,7 @@ nodeList.push([...rowLayout.a]);
 // Set player starting attributes
 pcY = Math.ceil(pcY/lineSpacing)*lineSpacing;
 charDirection = directions.left;
+nextDirection = directions.left;
 
 // Toggle pause when button clicked
 pauseBtn.addEventListener("click", function() {
