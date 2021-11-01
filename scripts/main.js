@@ -20,6 +20,8 @@ const xMargin = 30;
 let bgTranslate = 0;
 let prevBgTranslate = 0;
 const gravity = 9.8/10;
+const activeRowId = 5;
+let activeRowY;
 
 const cvsSize = lineSpacing*gridCount + 2*xMargin;
 
@@ -48,7 +50,9 @@ const rowLayoutSpecs = {
 let pcX = cvsSize*0.5;
 let pcY = cvsSize*0.25; // pcY will be snapped to the nearest node at runtime
 let charDirection;
-let hitTolerance = 10; // How close in pixels to a node counts as a hit
+let hitTolerance = 15; // How close in pixels to a node counts as a hit
+// Probably good to set this to something around 10 when pc is forced on the track
+// Keep it higher until then
 
 // Other variables
 let isPaused = false;
@@ -99,14 +103,14 @@ function manageNodes() {
 
 
   if (updateRows) {
-    console.log("Node Change");
+    //console.log("Node Change");
 
     nodeList.shift();
 
     if (nextRowIsA) {
-      nodeList.push(rowLayout.a);
+      nodeList.push([...rowLayout.a]);
     } else {
-      nodeList.push(rowLayout.b);
+      nodeList.push([...rowLayout.b]);
     }
 
     nextRowIsA = !nextRowIsA;
@@ -117,19 +121,30 @@ function manageNodes() {
 /*--------------------------------------------------------------------------------*/
 
 function drawNodes() {
+
   manageNodes();
 
-  ctx.strokeStyle = "red";
   for (let i=0; i<nodeList.length; i++) {
 
     // nextRowIsA toggles as the offset needs to change size
     let y = i*lineSpacing/2 - bgTranslate + nextRowIsA*lineSpacing/2;
+
+    // Set color and activeRowY if current row is active row
+    if (i==activeRowId) {
+      ctx.strokeStyle = "teal";
+      ctx.fillStyle = "blue";
+      activeRowY = y;
+    } else {
+      ctx.strokeStyle = "blue";
+      ctx.fillStyle = "blue";
+    }
 
     let xVals = nodeList[i];
 
     for (let j=0; j<xVals.length; j++) {
       ctx.beginPath();
       ctx.arc(xVals[j], y, 10, 0, 2 * Math.PI);
+      ctx.fill();
       ctx.stroke();
     }
   }
@@ -148,10 +163,46 @@ function drawBG() {
 
 /*--------------------------------------------------------------------------------*/
 
+
+/*
+* Figure out if player is on node and return the node they're on
+* Use hitTolerance variable to allow wiggle room
+*/
 function playerOnNode() {
-  // Figure out if player is on node and return the node they're on
-  // Use hitTolerance variable to allow wiggle room
-  //Math.hypot(x2-x1, y2-y1)
+
+  // Check if active row's y position has been hit or passed. Return if not
+  if(pcY < (activeRowY-hitTolerance) ) { return; }
+
+  // Check if active row layout is A or B, determine nearest node accordingly
+  let layout = ( nodeList[activeRowId].length == rowLayout.a.length ) ? rowLayoutSpecs.a : rowLayoutSpecs.b;
+  const percent = (pcX - layout.start) / (cvsSize - 2*layout.start);
+  const nearestNodeId = Math.round(percent * (layout.count-1));
+
+  // Check if neareset node is within hitTolerance
+  const nearestNodeX = nodeList[activeRowId][nearestNodeId];
+
+  // Check if nearest node's x is within hitTolerance of player Character. Return if not
+  if(Math.abs(pcX - nearestNodeX) > hitTolerance ) { return; }
+
+
+
+  return {
+    row: activeRowId,
+    col: nearestNodeId
+  };
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+function handleNodeCollisions() {
+  const node = playerOnNode();
+
+  // Clear collided node by moving it way off screen to the left
+  if (node) {
+    nodeList[node.row][node.col] = -1000;
+  }
 }
 
 
@@ -230,6 +281,7 @@ function draw(){
 
   drawBG();
   drawPC();
+  handleNodeCollisions();
 
   requestAnimationFrame(draw);
 }
@@ -246,20 +298,20 @@ canvas.height = cvsSize;
 rowLayout.a = generateRowLayouts(rowLayoutSpecs.a);
 rowLayout.b = generateRowLayouts(rowLayoutSpecs.b);
 
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
-nodeList.push(rowLayout.b);
-nodeList.push(rowLayout.a);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
+nodeList.push([...rowLayout.b]);
+nodeList.push([...rowLayout.a]);
 
 // Set player starting attributes
 pcY = Math.ceil(pcY/lineSpacing)*lineSpacing;
