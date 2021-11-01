@@ -11,6 +11,7 @@ const pc_centerCoords = {
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const pauseBtn = document.getElementById('pauseBtn');
+const scoreDisplay = document.getElementById('score');
 
 
 // BG variables
@@ -56,6 +57,7 @@ let hitTolerance = 15; // How close in pixels to a node counts as a hit
 
 // Other variables
 let isPaused = false;
+let simpleScore = 0;
 const directions = {
   left: "LEFT",
   right: "RIGHT",
@@ -196,12 +198,25 @@ function playerOnNode() {
 /*--------------------------------------------------------------------------------*/
 
 
+function simpleScoreUpdate(newScore) {
+  if(!newScore) {
+    newScore = simpleScore;
+  }
+  scoreDisplay.innerHTML = "Score: " + newScore;
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
 function handleNodeCollisions() {
   const node = playerOnNode();
 
   // Clear collided node by moving it way off screen to the left
   if (node) {
+    simpleScore++;
     nodeList[node.row][node.col] = -1000;
+    simpleScoreUpdate();
   }
 }
 
