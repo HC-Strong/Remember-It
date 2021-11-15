@@ -301,7 +301,10 @@ function changePlayerDir(node) {
   * Resets goal
 */
 function finishGoal() {
-  scoreUpdate(score + goal.PATTERN.length);
+
+  score += goal.PATTERN.length
+  
+  scoreUpdate();
   alert("YAY! You completed the goal!");
   goalUpdate();
 }
