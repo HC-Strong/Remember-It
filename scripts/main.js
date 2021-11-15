@@ -33,25 +33,34 @@ let rowLayout = {};
 let nodeList = [[]];
 let nextRowIsA = false;
 
+const nt = {
+  EMPTY: "empty_node"
+}
+
 // node types
 const nodeType = {
   BLUE: {
+    TYPE: "blue",
     COLOR: "blue",
     SCORE: 5
   },
   RED: {
+    TYPE: "red",
     COLOR: "red",
     SCORE: 10
   },
   BLACK1: {
+    TYPE: nt.EMPTY,
     COLOR: "black",
     SCORE: 0
   },
   BLACK2: {
+    TYPE: nt.EMPTY,
     COLOR: "black",
     SCORE: 0
   },
   BLACK3: {
+    TYPE: nt.EMPTY,
     COLOR: "black",
     SCORE: 0
   }
@@ -81,6 +90,8 @@ let nextDirection;
 // Other variables
 let isPaused = false;
 let score = 0;
+let goal = {};
+
 const directions = {
   left: "LEFT",
   right: "RIGHT",
@@ -284,14 +295,63 @@ function changePlayerDir(node) {
 /*--------------------------------------------------------------------------------*/
 
 
+/**
+  * Updates score to reflect number of nodes in completed goal
+  * Alerts user
+  * Resets goal
+*/
+function finishGoal() {
+  scoreUpdate(score + goal.PATTERN.length);
+  alert("YAY! You completed the goal!");
+  goalUpdate();
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+/**
+  * Checks if input node is of the type of the next node in the goal sequcne
+  * If so, increment goal.NEXT, check if goal complete and run finishGoal() if so
+  * If not, reset goal unless type is empty (EMPTY)
+*/
+function checkIfGoalNodeHit(node) {
+  // Ingore empty nodes
+  if (node.TYPE === nt.EMPTY) {
+    return;
+  }
+
+  // Check if node type matches next goal pattern node
+  if (node.TYPE === goal.PATTERN[goal.NEXT].TYPE) {
+    console.log("Yep, it's a match: " + node.COLOR + " = " + goal.PATTERN[goal.NEXT].COLOR);
+    goal.NEXT++;
+
+    // Check if pattern is complete
+    if (goal.NEXT >= goal.PATTERN.length) {
+      finishGoal();
+    }
+  }
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+/**
+  * Checks for collision and gets colided node if there is one
+  * Clears collided node by moving it way off screen to the left
+  * Cheks for goal pattern match, updates score
+*/
 function handleNodeCollisions() {
   const node = playerOnNode();
 
-  // Clear collided node by moving it way off screen to the left
   if (node) {
-    score += node.SCORE;
+    //score += node.SCORE; // Turn this on to give points for all nodes based on SCORE parameter
     changePlayerDir(node);
-    node.X_COORD = -1000;
+    node.X_COORD = -1000
+
+    checkIfGoalNodeHit(node);
+
     scoreUpdate();
   }
 }
@@ -355,6 +415,19 @@ function handleKeypress(e) {
 
 /*--------------------------------------------------------------------------------*/
 
+/**
+  * Sets the current goal to a sequence of nodeTypes and resets NEXT to 0
+  * TO DO - Currently hardcoed so always blue, blue red. Fix this.
+*/
+function goalUpdate() {
+  goal.PATTERN = [nodeType.BLUE, nodeType.BLUE, nodeType.RED];
+  goal.NEXT = 0;
+  console.log("Next Goal is: " + goal.PATTERN);
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
 
 function draw(){
   if (isPaused) { return; }
@@ -395,4 +468,8 @@ pauseBtn.addEventListener("click", function() {
 // Add Player Controls
 document.addEventListener("keypress", e => handleKeypress(e));
 
+// Set initial goal
+goalUpdate();
+
+// Start canvas drawing animation
 draw();
