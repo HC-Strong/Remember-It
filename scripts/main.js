@@ -304,7 +304,7 @@ function drawPC() {
     rot = -rad;
   } else if ( charDirection === directions.left) {
     pcX = Math.max(pcX - gravity, xMargin);
-    rot = rad
+    rot = rad;
   }
 
   // Apply transforms based on velocity, rotation, and pixel offset of image center
