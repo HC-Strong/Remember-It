@@ -35,9 +35,18 @@ let nextRowIsA = false;
 
 // node types
 const nodeType = {
-  BLUE: "blue",
-  RED: "red",
-  BLACK: "black"
+  BLUE: {
+    COLOR: "blue",
+    SCORE: 5
+  },
+  RED: {
+    COLOR: "red",
+    SCORE: 10
+  },
+  BLACK: {
+    COLOR: "black",
+    SCORE: 0
+  }
 };
 
 const rowLayoutSpecs = {
@@ -63,7 +72,7 @@ let nextDirection;
 
 // Other variables
 let isPaused = false;
-let simpleScore = 0;
+let score = 0;
 const directions = {
   left: "LEFT",
   right: "RIGHT",
@@ -118,7 +127,7 @@ function randEnumValue(enumeration) {
 
 /**
 * Generates an array of nodes with length determined by the nextRowIsA global var
-* Nodes are randomly selected from the available node types
+* Nodes are randomly copied from one of the available node types template objects
 */
 function newNodeRow() {
   const layoutSpec = nextRowIsA ? rowLayoutSpecs.a : rowLayoutSpecs.b;
@@ -126,15 +135,10 @@ function newNodeRow() {
   let nodeRow = [];
 
   for (let i=0; i<layoutSpec.count; i++) {
+    const node = {...randEnumValue(nodeType)}; /// Make new copy of nodeType template object
+    node.X_COORD = (layoutSpec.start + i*lineSpacing);
 
-    const color = randEnumValue(nodeType);
-
-    let nodeObj = {
-      X_COORD: (layoutSpec.start + i*lineSpacing),
-      COLOR: color
-    };
-
-    nodeRow.push(nodeObj);
+    nodeRow.push(node);
   }
   nextRowIsA = !nextRowIsA;
   return nodeRow;
@@ -233,7 +237,8 @@ function playerOnNode() {
 
   return {
     row: activeRowId,
-    col: nearestNodeId
+    col: nearestNodeId,
+    nodeRef: nodeList[activeRowId][nearestNodeId]
   };
 }
 
@@ -241,9 +246,9 @@ function playerOnNode() {
 /*--------------------------------------------------------------------------------*/
 
 
-function simpleScoreUpdate(newScore) {
+function scoreUpdate(newScore) {
   if(!newScore) {
-    newScore = simpleScore;
+    newScore = score;
   }
   scoreDisplay.innerHTML = "Score: " + newScore;
 }
@@ -280,10 +285,10 @@ function handleNodeCollisions() {
 
   // Clear collided node by moving it way off screen to the left
   if (node) {
-    simpleScore++;
+    score += node.nodeRef.SCORE;
     changePlayerDir(node);
     nodeList[node.row][node.col].X_COORD = -1000;
-    simpleScoreUpdate();
+    scoreUpdate();
   }
 }
 
