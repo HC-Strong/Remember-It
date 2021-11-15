@@ -114,6 +114,7 @@ function drawLine(x1, y1, x2, y2) {
 
 
 function drawGrid() {
+  ctx.strokeStyle = "black";
   ctx.translate(xMargin, -bgTranslate);
 
   for (let i=0; i<gridCount; i++) {
@@ -227,7 +228,6 @@ function drawNodes() {
       drawNode(row[j], y);
     }
   }
-  ctx.strokeStyle = "black";
 }
 
 
@@ -407,20 +407,33 @@ function drawPC() {
 
 
 function drawHUD() {
+  const nodeCount = goal.PATTERN.length;
 
-  // HUD Rectangle
-  const width = (lineSpacing/2) * 5 + 20; // Cram goal nodes in twice as tight, room for 5x
+  // HUD parameters
+  const width = (lineSpacing/2) * nodeCount + xMargin*2; // Cram goal nodes in twice as tight, room for 5x with margin
   const height = lineSpacing;
+  const xStart = cvsSize/2 - width/2;
+  const yStart = xMargin/2;
 
+  // Translate to HUD position
+  ctx.translate(xStart, yStart);
+
+  // Draw HUD
   ctx.beginPath();
-  ctx.rect(cvsSize/2 - width/2, 8, width, 100);
+  ctx.rect(0, 0, width, lineSpacing);
   ctx.fillStyle = "#282C34";
+  ctx.strokeStyle = "black";
   ctx.fill();
   ctx.stroke();
 
   // HUD nodes
+  ctx.translate((width/2)-(nodeCount/2 * lineSpacing/2) + 25, 0); // I do not understand where the 25 px offset comes from. It's 5/6ths of xMargin?
+  for (let i=0; i<nodeCount; i++) {
+    drawNode(goal.PATTERN[i], height/2);
+    console.log("Drawing " + JSON.stringify(goal.PATTERN[i]));
+  }
 
-
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
 }
 
 
@@ -457,7 +470,14 @@ function handleKeypress(e) {
   * TO DO - Currently hardcoed so always blue, blue red. Fix this.
 */
 function goalUpdate() {
-  goal.PATTERN = [nodeType.BLUE, nodeType.BLUE, nodeType.RED];
+  goal.PATTERN = [{...nodeType.BLUE}, {...nodeType.BLUE}, {...nodeType.RED}];
+
+  // Set X_COORDs for nodes
+  goal.PATTERN.map( (p, i) => {
+    p.X_COORD = i*lineSpacing/2;
+    return p;
+  });
+
   goal.NEXT = 0;
   console.log("Next Goal is: " + goal.PATTERN);
 }
