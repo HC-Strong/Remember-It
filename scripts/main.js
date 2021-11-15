@@ -191,14 +191,25 @@ function manageNodes() {
 
 /**
   * Draws the input node at it's own X coord, input y coord
+  * Optional third and 4th parameters specify if white outline or greying out should be appliedy
 */
-function drawNode(node, y_coord) {
+function drawNode(node, y_coord, whiteOutline, isGreyedOut) {
   ctx.fillStyle = ctx.strokeStyle = node.COLOR;
+  ctx.strokeStyle = whiteOutline ?  "white" : ctx.strokeStyle;
+
+  const r = whiteOutline ? xMargin*(2/3) : xMargin/3;
+
   ctx.beginPath();
-  ctx.arc(node.X_COORD, y_coord, 10, 0, 2 * Math.PI);
+  ctx.arc(node.X_COORD, y_coord, r, 0, 2 * Math.PI);
   ctx.fill();
   ctx.stroke();
 
+  if (isGreyedOut) {
+    ctx.fillStyle = "rgb(40, 44, 52, 0.7)";
+    ctx.beginPath();
+    ctx.arc(node.X_COORD, y_coord, r, 0, 2 * Math.PI);
+    ctx.fill()
+  }
 }
 
 
@@ -429,8 +440,8 @@ function drawHUD() {
   // HUD nodes
   ctx.translate((width/2)-(nodeCount/2 * lineSpacing/2) + 25, 0); // I do not understand where the 25 px offset comes from. It's 5/6ths of xMargin?
   for (let i=0; i<nodeCount; i++) {
-    drawNode(goal.PATTERN[i], height/2);
-    console.log("Drawing " + JSON.stringify(goal.PATTERN[i]));
+    let whiteOutline = true;
+    drawNode(goal.PATTERN[i], height/2, whiteOutline, i<goal.NEXT);
   }
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -470,7 +481,7 @@ function handleKeypress(e) {
   * TO DO - Currently hardcoed so always blue, blue red. Fix this.
 */
 function goalUpdate() {
-  goal.PATTERN = [{...nodeType.BLUE}, {...nodeType.BLUE}, {...nodeType.RED}];
+  goal.PATTERN = [{...nodeType.BLUE}, {...nodeType.BLUE}, {...nodeType.RED}, {...nodeType.BLUE}, {...nodeType.RED}];
 
   // Set X_COORDs for nodes
   goal.PATTERN.map( (p, i) => {
@@ -492,9 +503,9 @@ function draw(){
 
   drawBG();
   drawPC();
-  handleNodeCollisions();
-
   drawHUD();
+
+  handleNodeCollisions();
 
   requestAnimationFrame(draw);
 }
