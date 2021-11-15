@@ -43,7 +43,15 @@ const nodeType = {
     COLOR: "red",
     SCORE: 10
   },
-  BLACK: {
+  BLACK1: {
+    COLOR: "black",
+    SCORE: 0
+  },
+  BLACK2: {
+    COLOR: "black",
+    SCORE: 0
+  },
+  BLACK3: {
     COLOR: "black",
     SCORE: 0
   }
