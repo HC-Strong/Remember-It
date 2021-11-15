@@ -128,7 +128,7 @@ function newNodeRow() {
   for (let i=0; i<layoutSpec.count; i++) {
     let color = nodeType.BLACK;
     if(i % 2 == 0) {
-      nodeType.RED;
+      color = nodeType.RED;
     }
     let nodeObj = {
       X_COORD: (layoutSpec.start + i*lineSpacing),
@@ -176,21 +176,21 @@ function drawNodes() {
     // nextRowIsA toggles as the offset needs to change size
     let y = i*lineSpacing/2 - bgTranslate + nextRowIsA*lineSpacing/2;
 
-    // Set color and activeRowY if current row is active row
+    // Set stroke thickness and activeRowY if current row is active row
     if (i==activeRowId) {
-      ctx.strokeStyle = "teal";
-      ctx.fillStyle = "blue";
+      ctx.lineWidth = 10;
       activeRowY = y;
     } else {
-      ctx.strokeStyle = "blue";
-      ctx.fillStyle = "blue";
+      ctx.lineWidth = 1;
     }
 
     let row = nodeList[i];
 
     for (let j=0; j<row.length; j++) {
+      let curNode = row[j];
+      ctx.fillStyle = ctx.strokeStyle = curNode.COLOR;
       ctx.beginPath();
-      ctx.arc(row[j].X_COORD, y, 10, 0, 2 * Math.PI);
+      ctx.arc(curNode.X_COORD, y, 10, 0, 2 * Math.PI);
       ctx.fill();
       ctx.stroke();
     }
