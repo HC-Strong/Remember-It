@@ -117,6 +117,35 @@ function randEnumValue(enumeration) {
 
 
 /**
+* Generates an array of nodes with length determined by the nextRowIsA global var
+* Nodes are randomly selected from the available node types
+*/
+function newNodeRow() {
+  const layoutSpec = nextRowIsA ? rowLayoutSpecs.a : rowLayoutSpecs.b;
+
+  let nodeRow = [];
+
+  for (let i=0; i<layoutSpec.count; i++) {
+    let color = nodeType.BLACK;
+    if(i % 2 == 0) {
+      nodeType.RED;
+    }
+    let nodeObj = {
+      X_COORD: (layoutSpec.start + i*lineSpacing),
+      COLOR: color
+    };
+
+    nodeRow.push(nodeObj);
+  }
+  nextRowIsA = !nextRowIsA;
+  return nodeRow;
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+/**
 * Checks if bg has scrolled enough to need to update Nodes
 * If so, deletes top row and adds new node row to end of nodeList array
 */
@@ -126,24 +155,17 @@ function manageNodes() {
   let updateRows = (bgTranslate < prevBgTranslate)
       || (bgTranslate >= lineSpacing/2 && prevBgTranslate < lineSpacing/2);
 
-
   if (updateRows) {
     //console.log("Node Change");
-
     nodeList.shift();
-
-    if (nextRowIsA) {
-      nodeList.push(generateRowLayouts(rowLayoutSpecs.a));
-    } else {
-      nodeList.push(generateRowLayouts(rowLayoutSpecs.b));
-    }
-
-    //nextRowIsA = !nextRowIsA;
+    nodeList.push(newNodeRow());
   }
   prevBgTranslate = bgTranslate;
 }
 
+
 /*--------------------------------------------------------------------------------*/
+
 
 function drawNodes() {
 
@@ -164,14 +186,11 @@ function drawNodes() {
       ctx.fillStyle = "blue";
     }
 
-    //let xVals = nodeList[i]; TO DO - use map here to actually get xVals
-    let theNodes = nodeList[i];
+    let row = nodeList[i];
 
-    //for (let j=0; j<xVals.length; j++) {
-    for (let j=0; j<theNodes.length; j++) {
+    for (let j=0; j<row.length; j++) {
       ctx.beginPath();
-      //ctx.arc(xVals[j].X, y, 10, 0, 2 * Math.PI); // NODE REF
-      ctx.arc(theNodes[j].X_COORD, y, 10, 0, 2 * Math.PI); // NODE REF
+      ctx.arc(row[j].X_COORD, y, 10, 0, 2 * Math.PI);
       ctx.fill();
       ctx.stroke();
     }
@@ -202,12 +221,12 @@ function playerOnNode() {
   if(pcY < (activeRowY-hitTolerance) ) { return; }
 
   // Check if active row layout is A or B, determine nearest node accordingly
-  let layout = ( nodeList[activeRowId].length == rowLayout.a.length ) ? rowLayoutSpecs.a : rowLayoutSpecs.b;
+  let layout = ( nodeList[activeRowId].length == rowLayoutSpecs.a.count ) ? rowLayoutSpecs.a : rowLayoutSpecs.b;
   const percent = (pcX - layout.start) / (cvsSize - 2*layout.start);
   const nearestNodeId = Math.round(percent * (layout.count-1));
 
   // Check if neareset node is within hitTolerance
-  const nearestNodeX = nodeList[activeRowId][nearestNodeId].X_COORD; // NODE REF
+  const nearestNodeX = nodeList[activeRowId][nearestNodeId].X_COORD;
 
   // Check if nearest node's x is within hitTolerance of player Character. Return if not
   if(Math.abs(pcX - nearestNodeX) > hitTolerance ) { return; }
@@ -238,14 +257,18 @@ function simpleScoreUpdate(newScore) {
 * Otherwise, change direction to user-specified direction */
 function changePlayerDir(node) {
 
-  if( nodeList[node.row][node.col].X_COORD == xMargin ) { // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
+  if( nodeList[node.row][node.col].X_COORD == xMargin ) {
 
     nextDirection = directions.right;
   } else if ( node.col == gridCount ) {
 
     nextDirection = directions.left;
   }
-  console.log("Dir change from " + charDirection + " to " + nextDirection);
+
+  if (charDirection != nextDirection) {
+    console.log("Dir change from " + charDirection + " to " + nextDirection);
+  }
+
   charDirection = nextDirection;
 }
 
@@ -260,9 +283,8 @@ function handleNodeCollisions() {
   if (node) {
     simpleScore++;
     changePlayerDir(node);
-    nodeList[node.row][node.col].X_COORD = -1000; // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
+    nodeList[node.row][node.col].X_COORD = -1000;
     simpleScoreUpdate();
-    console.log("------------------------------------------------");
   }
 }
 
@@ -325,30 +347,6 @@ function handleKeypress(e) {
 
 /*--------------------------------------------------------------------------------*/
 
-// Take data from rowLayoutSpecs variable and generate the actual row layout array
-function generateRowLayouts(layoutSpec) {
-  let layoutArr = [];
-
-  for (let i=0; i<layoutSpec.count; i++) {
-    let color = nodeType.BLACK;
-    if(i % 2 == 0) {
-      nodeType.RED;
-    }
-    let nodeObj = {
-      X_COORD: (layoutSpec.start + i*lineSpacing),
-      COLOR: color
-    };
-
-    layoutArr.push(nodeObj);
-  }
-  console.log(layoutArr);
-  nextRowIsA = !nextRowIsA;
-  return layoutArr;
-}
-
-
-/*--------------------------------------------------------------------------------*/
-
 
 function draw(){
   if (isPaused) { return; }
@@ -369,39 +367,17 @@ function draw(){
 canvas.width = cvsSize;
 canvas.height = cvsSize;
 
-// Generate row layout arrays from rowLayoutSpecs
-rowLayout.a = generateRowLayouts(rowLayoutSpecs.a);
-rowLayout.b = generateRowLayouts(rowLayoutSpecs.b);
-
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-// nodeList.push([...rowLayout.b]);
-// nodeList.push([...rowLayout.a]);
-
-
+// Generate initial nodes
 for (let i=0; i<14; i++) {
-  // nodeList.push(newNodeRow());
-  nodeList.push(generateRowLayouts(rowLayoutSpecs.b));
-  // nextRowIsA = !nextRowIsA;
+  nodeList.push(newNodeRow());
 }
-
 
 // Set player starting attributes
 pcY = Math.ceil(pcY/lineSpacing)*lineSpacing;
 charDirection = directions.left;
 nextDirection = directions.left;
 
-// Toggle pause when button clicked
+// Add event listener to Toggle pause when button clicked
 pauseBtn.addEventListener("click", function() {
   isPaused = !isPaused;
   draw();
