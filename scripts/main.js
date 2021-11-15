@@ -223,23 +223,18 @@ function playerOnNode() {
   // Check if active row's y position has been hit or passed. Return if not
   if(pcY < (activeRowY-hitTolerance) ) { return; }
 
-  // Check if active row layout is A or B, determine nearest node accordingly
+  // Check if active row layout is A or B
   let layout = ( nodeList[activeRowId].length == rowLayoutSpecs.a.count ) ? rowLayoutSpecs.a : rowLayoutSpecs.b;
+
+  // Get nearest node ID using X-coord as percentage of nodes in layout
   const percent = (pcX - layout.start) / (cvsSize - 2*layout.start);
   const nearestNodeId = Math.round(percent * (layout.count-1));
-
-  // Check if neareset node is within hitTolerance
-  const nearestNodeX = nodeList[activeRowId][nearestNodeId].X_COORD;
+  const nearestNode = nodeList[activeRowId][nearestNodeId];
 
   // Check if nearest node's x is within hitTolerance of player Character. Return if not
-  if(Math.abs(pcX - nearestNodeX) > hitTolerance ) { return; }
+  if(Math.abs(pcX - nearestNode.X_COORD) > hitTolerance ) { return; }
 
-
-  return {
-    row: activeRowId,
-    col: nearestNodeId,
-    nodeRef: nodeList[activeRowId][nearestNodeId]
-  };
+  return nearestNode;
 }
 
 
@@ -257,14 +252,15 @@ function scoreUpdate(newScore) {
 /*--------------------------------------------------------------------------------*/
 
 
-/* Check if hit edge, change direction if so
-* Otherwise, change direction to user-specified direction */
+/** If player character is in the margins, send them back towards the center
+  * Otherwise, change direction to user-specified direction
+*/
 function changePlayerDir(node) {
 
-  if( nodeList[node.row][node.col].X_COORD == xMargin ) {
+  if( node.X_COORD <= xMargin ) {
 
     nextDirection = directions.right;
-  } else if ( node.col == gridCount ) {
+  } else if ( node.X_COORD >=  cvsSize-xMargin) {
 
     nextDirection = directions.left;
   }
@@ -285,9 +281,9 @@ function handleNodeCollisions() {
 
   // Clear collided node by moving it way off screen to the left
   if (node) {
-    score += node.nodeRef.SCORE;
+    score += node.SCORE;
     changePlayerDir(node);
-    nodeList[node.row][node.col].X_COORD = -1000;
+    node.X_COORD = -1000;
     scoreUpdate();
   }
 }
