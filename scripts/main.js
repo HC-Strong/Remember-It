@@ -188,6 +188,21 @@ function manageNodes() {
 
 /*--------------------------------------------------------------------------------*/
 
+/**
+  * Draws the input node at it's own X coord, input y coord
+*/
+function drawNode(node, y_coord) {
+  ctx.fillStyle = ctx.strokeStyle = node.COLOR;
+  ctx.beginPath();
+  ctx.arc(node.X_COORD, y_coord, 10, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.stroke();
+
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
 
 function drawNodes() {
 
@@ -209,12 +224,7 @@ function drawNodes() {
     let row = nodeList[i];
 
     for (let j=0; j<row.length; j++) {
-      let curNode = row[j];
-      ctx.fillStyle = ctx.strokeStyle = curNode.COLOR;
-      ctx.beginPath();
-      ctx.arc(curNode.X_COORD, y, 10, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.stroke();
+      drawNode(row[j], y);
     }
   }
   ctx.strokeStyle = "black";
@@ -302,8 +312,8 @@ function changePlayerDir(node) {
 */
 function finishGoal() {
 
-  score += goal.PATTERN.length
-  
+  score += goal.PATTERN.length;
+
   scoreUpdate();
   alert("YAY! You completed the goal!");
   goalUpdate();
@@ -396,6 +406,27 @@ function drawPC() {
 /*--------------------------------------------------------------------------------*/
 
 
+function drawHUD() {
+
+  // HUD Rectangle
+  const width = (lineSpacing/2) * 5 + 20; // Cram goal nodes in twice as tight, room for 5x
+  const height = lineSpacing;
+
+  ctx.beginPath();
+  ctx.rect(cvsSize/2 - width/2, 8, width, 100);
+  ctx.fillStyle = "#282C34";
+  ctx.fill();
+  ctx.stroke();
+
+  // HUD nodes
+
+
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
 function handleKeypress(e) {
   switch(e.keyCode) {
     // Thought this was 37 or 65
@@ -442,6 +473,8 @@ function draw(){
   drawBG();
   drawPC();
   handleNodeCollisions();
+
+  drawHUD();
 
   requestAnimationFrame(draw);
 }
