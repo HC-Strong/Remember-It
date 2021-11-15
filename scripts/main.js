@@ -330,6 +330,9 @@ function checkIfGoalNodeHit(node) {
     if (goal.NEXT >= goal.PATTERN.length) {
       finishGoal();
     }
+  } else { // If hit wrong node, reset goal
+    goal.NEXT = 0;
+    console.log("Restarting goal");
   }
 }
 
