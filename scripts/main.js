@@ -33,6 +33,13 @@ let rowLayout = {};
 let nodeList = [[]];
 let nextRowIsA = false;
 
+// node types
+const nodeType = {
+  BLUE: "blue",
+  RED: "red",
+  BLACK: "black"
+};
+
 const rowLayoutSpecs = {
   a : {
     start: xMargin,
@@ -144,7 +151,7 @@ function drawNodes() {
 
     for (let j=0; j<xVals.length; j++) {
       ctx.beginPath();
-      ctx.arc(xVals[j], y, 10, 0, 2 * Math.PI);
+      ctx.arc(xVals[j], y, 10, 0, 2 * Math.PI); // NODE REF
       ctx.fill();
       ctx.stroke();
     }
@@ -180,7 +187,7 @@ function playerOnNode() {
   const nearestNodeId = Math.round(percent * (layout.count-1));
 
   // Check if neareset node is within hitTolerance
-  const nearestNodeX = nodeList[activeRowId][nearestNodeId];
+  const nearestNodeX = nodeList[activeRowId][nearestNodeId]; // NODE REF
 
   // Check if nearest node's x is within hitTolerance of player Character. Return if not
   if(Math.abs(pcX - nearestNodeX) > hitTolerance ) { return; }
@@ -211,7 +218,7 @@ function simpleScoreUpdate(newScore) {
 * Otherwise, change direction to user-specified direction */
 function changePlayerDir(node) {
 
-  if( nodeList[node.row][node.col] == xMargin ) {
+  if( nodeList[node.row][node.col] == xMargin ) { // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
 
     nextDirection = directions.right;
   } else if ( node.col == gridCount ) {
@@ -233,7 +240,7 @@ function handleNodeCollisions() {
   if (node) {
     simpleScore++;
     changePlayerDir(node);
-    nodeList[node.row][node.col] = -1000;
+    nodeList[node.row][node.col] = -1000; // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
     simpleScoreUpdate();
   }
 }
