@@ -126,10 +126,9 @@ function newNodeRow() {
   let nodeRow = [];
 
   for (let i=0; i<layoutSpec.count; i++) {
-    let color = nodeType.BLACK;
-    if(i % 2 == 0) {
-      color = nodeType.RED;
-    }
+
+    const color = randEnumValue(nodeType);
+
     let nodeObj = {
       X_COORD: (layoutSpec.start + i*lineSpacing),
       COLOR: color
