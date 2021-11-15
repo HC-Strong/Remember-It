@@ -103,6 +103,23 @@ function drawGrid() {
 /*--------------------------------------------------------------------------------*/
 
 
+/**
+* Returns a random value from an enum. Used to get random node types.
+*/
+function randEnumValue(enumeration) {
+  const values = Object.keys(enumeration);
+  const enumKey = values[Math.floor(Math.random() * values.length)];
+  return enumeration[enumKey];
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+/**
+* Checks if bg has scrolled enough to need to update Nodes
+* If so, deletes top row and adds new node row to end of nodeList array
+*/
 function manageNodes() {
 
   // Check if bgTranslate has crossed the halfway point OR wrapped back to zero
