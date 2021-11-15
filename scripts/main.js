@@ -133,12 +133,12 @@ function manageNodes() {
     nodeList.shift();
 
     if (nextRowIsA) {
-      nodeList.push([...rowLayout.a]);
+      nodeList.push(generateRowLayouts(rowLayoutSpecs.a));
     } else {
-      nodeList.push([...rowLayout.b]);
+      nodeList.push(generateRowLayouts(rowLayoutSpecs.b));
     }
 
-    nextRowIsA = !nextRowIsA;
+    //nextRowIsA = !nextRowIsA;
   }
   prevBgTranslate = bgTranslate;
 }
@@ -164,11 +164,14 @@ function drawNodes() {
       ctx.fillStyle = "blue";
     }
 
-    let xVals = nodeList[i];
+    //let xVals = nodeList[i]; TO DO - use map here to actually get xVals
+    let theNodes = nodeList[i];
 
-    for (let j=0; j<xVals.length; j++) {
+    //for (let j=0; j<xVals.length; j++) {
+    for (let j=0; j<theNodes.length; j++) {
       ctx.beginPath();
-      ctx.arc(xVals[j], y, 10, 0, 2 * Math.PI); // NODE REF
+      //ctx.arc(xVals[j].X, y, 10, 0, 2 * Math.PI); // NODE REF
+      ctx.arc(theNodes[j].X_COORD, y, 10, 0, 2 * Math.PI); // NODE REF
       ctx.fill();
       ctx.stroke();
     }
@@ -204,7 +207,7 @@ function playerOnNode() {
   const nearestNodeId = Math.round(percent * (layout.count-1));
 
   // Check if neareset node is within hitTolerance
-  const nearestNodeX = nodeList[activeRowId][nearestNodeId]; // NODE REF
+  const nearestNodeX = nodeList[activeRowId][nearestNodeId].X_COORD; // NODE REF
 
   // Check if nearest node's x is within hitTolerance of player Character. Return if not
   if(Math.abs(pcX - nearestNodeX) > hitTolerance ) { return; }
@@ -235,7 +238,7 @@ function simpleScoreUpdate(newScore) {
 * Otherwise, change direction to user-specified direction */
 function changePlayerDir(node) {
 
-  if( nodeList[node.row][node.col] == xMargin ) { // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
+  if( nodeList[node.row][node.col].X_COORD == xMargin ) { // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
 
     nextDirection = directions.right;
   } else if ( node.col == gridCount ) {
@@ -257,8 +260,9 @@ function handleNodeCollisions() {
   if (node) {
     simpleScore++;
     changePlayerDir(node);
-    nodeList[node.row][node.col] = -1000; // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
+    nodeList[node.row][node.col].X_COORD = -1000; // NODE REF - row is ok, col will no longer refer just x coord, but will reference the entire node info
     simpleScoreUpdate();
+    console.log("------------------------------------------------");
   }
 }
 
@@ -326,9 +330,19 @@ function generateRowLayouts(layoutSpec) {
   let layoutArr = [];
 
   for (let i=0; i<layoutSpec.count; i++) {
-    layoutArr.push(layoutSpec.start + i*lineSpacing);
+    let color = nodeType.BLACK;
+    if(i % 2 == 0) {
+      nodeType.RED;
+    }
+    let nodeObj = {
+      X_COORD: (layoutSpec.start + i*lineSpacing),
+      COLOR: color
+    };
+
+    layoutArr.push(nodeObj);
   }
   console.log(layoutArr);
+  nextRowIsA = !nextRowIsA;
   return layoutArr;
 }
 
@@ -359,20 +373,28 @@ canvas.height = cvsSize;
 rowLayout.a = generateRowLayouts(rowLayoutSpecs.a);
 rowLayout.b = generateRowLayouts(rowLayoutSpecs.b);
 
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
-nodeList.push([...rowLayout.b]);
-nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+// nodeList.push([...rowLayout.b]);
+// nodeList.push([...rowLayout.a]);
+
+
+for (let i=0; i<14; i++) {
+  // nodeList.push(newNodeRow());
+  nodeList.push(generateRowLayouts(rowLayoutSpecs.b));
+  // nextRowIsA = !nextRowIsA;
+}
+
 
 // Set player starting attributes
 pcY = Math.ceil(pcY/lineSpacing)*lineSpacing;
