@@ -37,32 +37,28 @@ const nt = {
   EMPTY: "empty_node"
 }
 
+const goalNodePercent = 2/5; // The percent of grid nodes that are scoring nodes not black
+
 // node types
 const nodeType = {
-  BLUE: {
-    TYPE: "blue",
-    COLOR: "blue",
-    SCORE: 5
+  GOAL: {
+    BLUE: {
+      TYPE: "blue",
+      COLOR: "blue",
+      SCORE: 5
+    },
+    RED: {
+      TYPE: "red",
+      COLOR: "red",
+      SCORE: 10
+    }
   },
-  RED: {
-    TYPE: "red",
-    COLOR: "red",
-    SCORE: 10
-  },
-  BLACK1: {
-    TYPE: nt.EMPTY,
-    COLOR: "black",
-    SCORE: 0
-  },
-  BLACK2: {
-    TYPE: nt.EMPTY,
-    COLOR: "black",
-    SCORE: 0
-  },
-  BLACK3: {
-    TYPE: nt.EMPTY,
-    COLOR: "black",
-    SCORE: 0
+  EMPTY: {
+    EMPTY: {
+      TYPE: nt.EMPTY,
+      COLOR: "black",
+      SCORE: 0
+    }
   }
 };
 
@@ -155,7 +151,11 @@ function newNodeRow() {
   let nodeRow = [];
 
   for (let i=0; i<layoutSpec.count; i++) {
-    const node = {...randEnumValue(nodeType)}; /// Make new copy of nodeType template object
+
+    // Decide if node is empty or scoring/goal node based on goalNodePercent
+    const nodeCategory = Math.random() <= goalNodePercent ? nodeType.GOAL : nodeType.EMPTY;
+
+    const node = {...randEnumValue(nodeCategory)}; /// Make new copy of nodeType template object
     node.X_COORD = (layoutSpec.start + i*lineSpacing);
 
     nodeRow.push(node);
@@ -481,16 +481,24 @@ function handleKeypress(e) {
   * TO DO - Currently hardcoed so always blue, blue red. Fix this.
 */
 function goalUpdate() {
-  goal.PATTERN = [{...nodeType.BLUE}, {...nodeType.BLUE}, {...nodeType.RED}, {...nodeType.BLUE}, {...nodeType.RED}];
 
-  // Set X_COORDs for nodes
-  goal.PATTERN.map( (p, i) => {
-    p.X_COORD = i*lineSpacing/2;
-    return p;
-  });
+  // Get randome length for goal pattern between 3 and 7
+  let minLen = 3;
+  let maxLen = 7;
+  let randLen = Math.floor(Math.random() * (maxLen-minLen))+minLen;
+
+
+  // Generate an array of randLen and populate it with random nodeType object instances
+  // Assign each one an X_COORD based on it's position in the row
+  goal.PATTERN = Array.from('x'.repeat(randLen))
+    .map( (p, i) => {
+      p = {...randEnumValue(nodeType.GOAL)};
+      p.X_COORD = i*lineSpacing/2;
+      return p;
+    });
 
   goal.NEXT = 0;
-  console.log("Next Goal is: " + goal.PATTERN);
+  console.log("Next Goal is: " + JSON.stringify(goal.PATTERN));
 }
 
 
