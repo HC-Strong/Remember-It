@@ -271,9 +271,10 @@ function drawBG() {
 /*--------------------------------------------------------------------------------*/
 
 
+// Updates pathPoint X_COORD by adding/subtracting gravity based on point group and position in grid pattern
 function updatePathPoints() {
   pathPoints = pathPoints.map( point => {
-    point.X_COORD += gravity * (point.GROUP-0.5)*2 * nextRowIsA; // TO DO - Probably a better way to do this. GROUP is bool and using this to toggle between -1 & 1. Math.sign(point.GROUP-0.5) would also work
+    point.X_COORD += gravity * point.GROUP * (nextRowIsA ? 1 : -1);
     return point;
   });
 }
@@ -282,17 +283,22 @@ function updatePathPoints() {
 /*--------------------------------------------------------------------------------*/
 
 
+/** Generates path points based on gridCount and lineSpacing global variables
+  * Generates 2 pathPoints on each node, one traveling in each direction to cover all path
+  * Note that if the PC doesn't start exactly on a node, this won't work correctly
+  */
 function initPathPoints() {
   const pp1 = pcX - (gridCount/2) * lineSpacing;
-  let group = false;
+  let group = -1;
 
-  for (let i=0; i<=gridCount; i++) {
+  for (let i=0; i<gridCount; i+=0.5) {
+    let index =  Math.ceil(i);
     let pathPoint = {
-      X_COORD: pp1 + i*lineSpacing,
+      X_COORD: pp1 + index*lineSpacing,
       GROUP: group
     }
     pathPoints.push(pathPoint);
-    group = !group;
+    group = 0-group; //Toggles between 1 and -1
   }
 }
 
