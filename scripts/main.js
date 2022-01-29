@@ -23,6 +23,7 @@ let prevBgTranslate = 0;
 const gravity = 9.8/10;
 const activeRowId = 5;
 let activeRowY;
+let pathPoints = []; // This is a list of current allowed x coords to keep the PC on course
 
 const cvsSize = lineSpacing*gridCount + 2*xMargin;
 
@@ -245,13 +246,53 @@ function drawNodes() {
 /*--------------------------------------------------------------------------------*/
 
 
-function drawBG() {
-  drawGrid();
-  drawNodes();
+// This is a test function to visualize the pathPoints
+function drawPathPoints() {
+
+  for (p in pathPoints) {
+    let newNode = {...randEnumValue(nodeType.GOAL)};
+    newNode.X_COORD = pathPoints[p];
+    drawNode(newNode, pcY, false, false);
+  }
 }
 
 
 /*--------------------------------------------------------------------------------*/
+
+
+function drawBG() {
+  drawGrid();
+  drawNodes();
+  drawPathPoints();
+  updatePathPoints();
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+function updatePathPoints() {
+  pathPoints = pathPoints.map( point => {
+    point += gravity;
+    return point;
+  });
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
+
+function initPathPoints() {
+  let pp1 = pcX - (gridCount/2) * lineSpacing;
+
+  for (let i=0; i<=gridCount; i++) {
+    pathPoints.push(pp1 + i*lineSpacing);
+  }
+}
+
+
+/*--------------------------------------------------------------------------------*/
+
 
 
 /*
@@ -548,6 +589,9 @@ document.addEventListener("keypress", e => handleKeypress(e));
 
 // Set initial goal
 goalUpdate();
+
+// Initialize path pathPoints
+initPathPoints();
 
 // Start canvas drawing animation
 draw();
