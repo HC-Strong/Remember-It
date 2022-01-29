@@ -251,7 +251,7 @@ function drawPathPoints() {
 
   for (p in pathPoints) {
     let newNode = {...randEnumValue(nodeType.GOAL)};
-    newNode.X_COORD = pathPoints[p];
+    newNode.X_COORD = pathPoints[p].X_COORD;
     drawNode(newNode, pcY, false, false);
   }
 }
@@ -273,7 +273,7 @@ function drawBG() {
 
 function updatePathPoints() {
   pathPoints = pathPoints.map( point => {
-    point += gravity;
+    point.X_COORD += gravity * (point.GROUP-0.5)*2 * nextRowIsA; // TO DO - Probably a better way to do this. GROUP is bool and using this to toggle between -1 & 1. Math.sign(point.GROUP-0.5) would also work
     return point;
   });
 }
@@ -283,10 +283,16 @@ function updatePathPoints() {
 
 
 function initPathPoints() {
-  let pp1 = pcX - (gridCount/2) * lineSpacing;
+  const pp1 = pcX - (gridCount/2) * lineSpacing;
+  let group = false;
 
   for (let i=0; i<=gridCount; i++) {
-    pathPoints.push(pp1 + i*lineSpacing);
+    let pathPoint = {
+      X_COORD: pp1 + i*lineSpacing,
+      GROUP: group
+    }
+    pathPoints.push(pathPoint);
+    group = !group;
   }
 }
 
