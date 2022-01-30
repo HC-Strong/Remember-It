@@ -300,7 +300,7 @@ function initPathPoints() {
     }
     pathPoints.push(pathPoint);
     if (pathPoint.X_COORD == pcX) {
-      pc.pointIndex = pathPoints.length-1;
+      pc.pointIndex = pathPoints.length-2; // TO DO - figure out why this is -2 not -1. Everything breaks if it's -1
     }
     group = 0-group; //Toggles between 1 and -1
   }
@@ -321,7 +321,6 @@ function playerOnNode() {
 
   // Check if active row layout is A or B
   let layout = ( nodeList[activeRowId].length == rowLayoutSpecs.a.count ) ? rowLayoutSpecs.a : rowLayoutSpecs.b;
-
   // Get nearest node ID using X-coord as percentage of nodes in layout
   const percent = (pcX - layout.start) / (cvsSize - 2*layout.start);
   const nearestNodeId = Math.round(percent * (layout.count-1));
@@ -329,7 +328,6 @@ function playerOnNode() {
 
   // Check if nearest node's x is within hitTolerance of player Character. Return if not
   if(Math.abs(pcX - nearestNode.X_COORD) > hitTolerance ) { return; }
-
   return nearestNode;
 }
 
@@ -365,6 +363,7 @@ function changePlayerDir(node) {
     console.log("Dir change from " + charDirection + " to " + nextDirection);
   } else { // If the direction didn't change, the PC changes path nodes (path nodes zigzag)
     pc.pointIndex = Math.min(Math.max(0, pc.pointIndex + nextDirection), pathPoints.length-1);
+    console.log("pathPoint index changed to " + pc.pointIndex);
   }
 
   charDirection = nextDirection;
@@ -453,7 +452,7 @@ function drawPC() {
 
   // Calculate PC velocity & rotation
   if (charDirection === directions.right) {
-    pcX = Math.min(pcX + gravity, cvsSize-xMargin);
+    pcX = Math.min(pcX + gravity, cvsSize-xMargin); // TO DO - multiply gravity by something like 1.01 to see how it breaks when an offset is introducded and fix it
     rot = -rad;
   } else if ( charDirection === directions.left) {
     pcX = Math.max(pcX - gravity, xMargin);
@@ -463,8 +462,11 @@ function drawPC() {
   // Use the PC's current pathPoint attribute to correct trajectory errors
   // TO DO - can probably use the same logic used to turn the pathPoints to change rotation
   let pcPathPointX = pathPoints[pc.pointIndex].X_COORD;
-  if ( Math.abs(pcX - pcPathPointX) > hitTolerance*100 ) {
-    pcX = pcX + (pcPathPointX-pcX) / 20;
+  let offset = pcPathPointX - pcX;
+  if ( Math.abs(offset) > hitTolerance*10 ) {
+    let correction = Math.floor(offset/2);
+    pcX += correction;
+    console.log("Offset correction is " + correction);
   }
 
   // Apply transforms based on velocity, rotation, and pixel offset of image center
