@@ -90,9 +90,9 @@ let score = 0;
 let goal = {};
 
 const directions = {
-  left: "LEFT",
-  right: "RIGHT",
-  none: "NONE"
+  left: -1,
+  right: 1,
+  none: 0
 };
 
 
@@ -156,7 +156,7 @@ function newNodeRow() {
     // Decide if node is empty or scoring/goal node based on goalNodePercent
     const nodeCategory = Math.random() <= goalNodePercent ? nodeType.GOAL : nodeType.EMPTY;
 
-    const node = {...randEnumValue(nodeCategory)}; /// Make new copy of nodeType template object
+    const node = {...randEnumValue(nodeCategory)}; // Make new copy of nodeType template object
     node.X_COORD = (layoutSpec.start + i*lineSpacing);
 
     nodeRow.push(node);
@@ -285,6 +285,7 @@ function updatePathPoints() {
 
 /** Generates path points based on gridCount and lineSpacing global variables
   * Generates 2 pathPoints on each node, one traveling in each direction to cover all path
+  * Assigns one of the pathPoint to the pathPoint attribute of the player character
   * Note that if the PC doesn't start exactly on a node, this won't work correctly
   */
 function initPathPoints() {
@@ -298,13 +299,15 @@ function initPathPoints() {
       GROUP: group
     }
     pathPoints.push(pathPoint);
+    if (pathPoint.X_COORD == pcX) {
+      pc.pointIndex = pathPoints.length-1;
+    }
     group = 0-group; //Toggles between 1 and -1
   }
 }
 
 
 /*--------------------------------------------------------------------------------*/
-
 
 
 /*
@@ -360,6 +363,8 @@ function changePlayerDir(node) {
 
   if (charDirection != nextDirection) {
     console.log("Dir change from " + charDirection + " to " + nextDirection);
+  } else { // If the direction didn't change, the PC changes path nodes (path nodes zigzag)
+    pc.pointIndex = Math.min(Math.max(0, pc.pointIndex + nextDirection), pathPoints.length-1);
   }
 
   charDirection = nextDirection;
@@ -453,6 +458,13 @@ function drawPC() {
   } else if ( charDirection === directions.left) {
     pcX = Math.max(pcX - gravity, xMargin);
     rot = rad;
+  }
+
+  // Use the PC's current pathPoint attribute to correct trajectory errors
+  // TO DO - can probably use the same logic used to turn the pathPoints to change rotation
+  let pcPathPointX = pathPoints[pc.pointIndex].X_COORD;
+  if ( Math.abs(pcX - pcPathPointX) > hitTolerance*100 ) {
+    pcX = pcX + (pcPathPointX-pcX) / 20;
   }
 
   // Apply transforms based on velocity, rotation, and pixel offset of image center
